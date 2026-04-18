@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 
 const N8N_AFFILIATE = 'https://n8n.partnerlinks.io/u155r8fjoz2n'
-const CAL_LINK = 'https://cal.com/prompttoflow/setup' // Replace with your actual Cal.com link
+const CAL_LINK = 'https://cal.com/prompttoflow' // Replace with your actual Cal.com link
 
 const HOW_IT_WORKS = [
   { step: '01', icon: '📝', title: 'Describe your process', desc: 'Fill in our 5-step intake form. Tell us what you do manually, what triggers it, which tools you use, and what outcome you want.' },
