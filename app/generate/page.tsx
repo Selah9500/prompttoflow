@@ -44,24 +44,20 @@ export default function GeneratePage() {
 
   const progress = (step / 5) * 100
 
-  const buildPICF = () => `PERSONA:
-You are an expert n8n workflow architect with deep knowledge of all n8n nodes and production automation design.
+  const buildPICF = () => `Build a production-ready n8n workflow for this exact use case:
 
-INSTRUCTIONS:
-Generate a complete, valid n8n workflow JSON. Must be importable into n8n v1.0+, use only standard n8n nodes, include a trigger node, error handling, and descriptive node names.
+WHAT NEEDS TO BE AUTOMATED:
+${problem}
 
-CONTEXT:
-Problem: ${problem}
-Category: ${category || 'General'}
-Trigger: ${trigger || 'Manual trigger'}
-Tools: ${tools.join(', ') || 'Not specified'}
-Outcome: ${outcome}
-Quick outcomes: ${outcomes.join(', ') || 'Not specified'}
-Constraints: ${constraints || 'None'}
+DETAILS:
+- Category: ${category || 'General business process'}
+- Trigger: ${trigger || 'Manual trigger'}  
+- Apps/tools to connect: ${tools.length > 0 ? tools.join(', ') : 'Use appropriate n8n native nodes'}
+- What should happen at the end: ${outcome || 'Complete the automation successfully'}
+- Additional actions needed: ${outcomes.length > 0 ? outcomes.join(', ') : 'None'}
+- Edge cases and constraints: ${constraints || 'Handle errors gracefully'}
 
-FORMAT:
-Return ONLY valid JSON. No markdown, no explanation.
-Schema: { "name": string, "nodes": [], "connections": {}, "settings": { "executionOrder": "v1" }, "meta": { "description": string } }`
+Build a complete, professional workflow with proper error handling, descriptive node names, and a Setup Checklist sticky note listing all credentials needed.`
 
   const sampleJSON = () => JSON.stringify({
     name: (category || 'My') + ' Automation Workflow',
@@ -100,6 +96,7 @@ Schema: { "name": string, "nodes": [], "connections": {}, "settings": { "executi
       const data = await res.json()
       clearInterval(interval)
       setGeneratedJSON(JSON.stringify(data.workflow, null, 2) || sampleJSON())
+      if (data.toolsUsed) sessionStorage.setItem('ptf_tools_used', JSON.stringify(data.toolsUsed))
 } catch (err) {
       clearInterval(interval)
       console.error('Generation error:', err)
@@ -118,6 +115,7 @@ Schema: { "name": string, "nodes": [], "connections": {}, "settings": { "executi
     const a = document.createElement('a')
     a.href = url; a.download = 'prompttoflow-workflow.json'; a.click()
     URL.revokeObjectURL(url)
+    setTimeout(() => { window.location.href = '/setup-guide' }, 1000)
   }
 
   return (

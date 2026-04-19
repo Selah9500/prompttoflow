@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
-export const maxDuration = 30
+
+export const maxDuration = 60
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -19,6 +20,9 @@ RULES YOU MUST FOLLOW:
 8. Prefer native n8n nodes over HTTP Request nodes when a native integration exists
 9. Every node must have a valid position array [x, y] with 250px spacing between nodes
 10. All connections must reference nodes that actually exist in the nodes array
+11. ALWAYS add a final sticky note node titled "Setup Checklist" as the LAST node in the nodes array
+12. The Setup Checklist sticky note must detect which services are used and list ONLY relevant credentials with direct n8n docs links
+13. Position the Setup Checklist sticky note at [250, 600] or below all other nodes
 
 PREFERRED NODES (use these over generic alternatives):
 - Email: n8n-nodes-base.gmail or n8n-nodes-base.emailSend
@@ -33,6 +37,21 @@ PREFERRED NODES (use these over generic alternatives):
 - IF logic: n8n-nodes-base.if
 - Error handling: n8n-nodes-base.stopAndError
 - HTTP Request: n8n-nodes-base.httpRequest (only when no native node exists)
+
+SETUP CHECKLIST FORMAT — always include this as the last node:
+{
+  "parameters": {
+    "content": "## ⚙️ Setup Checklist\\n\\nBefore running this workflow, configure these credentials in n8n:\\n\\n[LIST ONLY THE SERVICES ACTUALLY USED IN THIS WORKFLOW]\\n\\n### How to add credentials:\\n1. Open n8n → Settings → Credentials\\n2. Click 'Add Credential'\\n3. Search for the service name\\n4. Follow the setup guide\\n\\n### Direct setup links:\\n[INCLUDE ONLY RELEVANT LINKS FROM THIS LIST]\\n- Gmail/Google: https://docs.n8n.io/integrations/builtin/credentials/google/\\n- HubSpot: https://docs.n8n.io/integrations/builtin/credentials/hubspot/\\n- Slack: https://docs.n8n.io/integrations/builtin/credentials/slack/\\n- Google Sheets: https://docs.n8n.io/integrations/builtin/credentials/google/\\n- Airtable: https://docs.n8n.io/integrations/builtin/credentials/airtable/\\n- Notion: https://docs.n8n.io/integrations/builtin/credentials/notion/\\n- Typeform: https://docs.n8n.io/integrations/builtin/credentials/typeform/\\n- Stripe: https://docs.n8n.io/integrations/builtin/credentials/stripe/\\n- Shopify: https://docs.n8n.io/integrations/builtin/credentials/shopify/\\n- Calendly: https://docs.n8n.io/integrations/builtin/credentials/calendly/\\n- Trello: https://docs.n8n.io/integrations/builtin/credentials/trello/\\n- ClickUp: https://docs.n8n.io/integrations/builtin/credentials/clickup/\\n\\n### Need help?\\nBook a setup call at https://prompttoflow.io/setup-service",
+    "height": 500,
+    "width": 450,
+    "color": 4
+  },
+  "id": "setup-checklist-note",
+  "name": "Setup Checklist",
+  "type": "n8n-nodes-base.stickyNote",
+  "typeVersion": 1,
+  "position": [250, 600]
+}
 
 OUTPUT SCHEMA — return exactly this structure:
 {
@@ -113,7 +132,7 @@ export async function POST(request: NextRequest) {
       attempts++
 
       const message = await client.messages.create({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-sonnet-4-5-20250929',
         max_tokens: 4096,
         temperature: 0,
         system: SYSTEM_PROMPT,
@@ -154,7 +173,13 @@ export async function POST(request: NextRequest) {
       workflow = parsed
     }
 
-    return NextResponse.json({ workflow, email })
+    // Extract tools used for the setup guide
+    const toolsUsed = workflow.nodes
+      .map((n: any) => n.type)
+      .filter((t: string) => t !== 'n8n-nodes-base.stickyNote')
+      .map((t: string) => t.replace('n8n-nodes-base.', ''))
+
+    return NextResponse.json({ workflow, email, toolsUsed })
   } catch (error) {
     console.error('Generate error:', error)
     return NextResponse.json(
