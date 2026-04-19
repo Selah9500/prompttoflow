@@ -182,7 +182,7 @@ return NextResponse.json(
 
     return NextResponse.json({ workflow, email, toolsUsed })
   } catch (error) {
-    cconsole.error('Generate error:', JSON.stringify(error, null, 2))
+    console.error('Generate error:', JSON.stringify(error, null, 2))
     return NextResponse.json(
       { error: 'Something went wrong. Please try again.' },
       { status: 500 }
