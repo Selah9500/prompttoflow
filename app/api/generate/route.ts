@@ -164,10 +164,11 @@ export async function POST(request: NextRequest) {
       const validation = validateWorkflow(parsed)
       if (!validation.valid) {
         if (attempts < maxAttempts) continue
-        return NextResponse.json(
-          { error: `Invalid workflow structure: ${validation.error}` },
-          { status: 500 }
-        )
+console.error('Validation failed:', validation.error, JSON.stringify(parsed, null, 2).substring(0, 500))
+return NextResponse.json(
+  { error: `Invalid workflow structure: ${validation.error}` },
+  { status: 500 }
+)
       }
 
       workflow = parsed
@@ -181,7 +182,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ workflow, email, toolsUsed })
   } catch (error) {
-    console.error('Generate error:', error)
+    cconsole.error('Generate error:', JSON.stringify(error, null, 2))
     return NextResponse.json(
       { error: 'Something went wrong. Please try again.' },
       { status: 500 }
