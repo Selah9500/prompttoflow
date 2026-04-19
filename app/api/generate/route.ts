@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
+export const maxDuration = 30
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
       attempts++
 
       const message = await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 4096,
         temperature: 0,
         system: SYSTEM_PROMPT,
