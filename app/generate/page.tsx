@@ -99,10 +99,13 @@ Schema: { "name": string, "nodes": [], "connections": {}, "settings": { "executi
       })
       const data = await res.json()
       clearInterval(interval)
-      setGeneratedJSON(data.workflow || sampleJSON())
-    } catch {
+      setGeneratedJSON(JSON.stringify(data.workflow, null, 2) || sampleJSON())
+} catch (err) {
       clearInterval(interval)
-      setGeneratedJSON(sampleJSON())
+      console.error('Generation error:', err)
+      setStatus('form')
+      alert('Something went wrong. Please try again.')
+      return
     }
 
     setCredits(c => Math.max(0, c - 1))
