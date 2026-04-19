@@ -88,14 +88,21 @@ Build a complete, professional workflow with proper error handling, descriptive 
     }, 700)
 
     try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 55000)
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: buildPICF(), email })
+        body: JSON.stringify({ prompt: buildPICF(), email }),
+        signal: controller.signal
       })
+      clearTimeout(timeout)
       const data = await res.json()
       clearInterval(interval)
-      setGeneratedJSON(JSON.stringify(data.workflow, null, 2) || sampleJSON())
+      if (!data.workflow) {
+        throw new Error(data.error || 'No workflow returned')
+      }
+      setGeneratedJSON(JSON.stringify(data.workflow, null, 2))
       if (data.toolsUsed) sessionStorage.setItem('ptf_tools_used', JSON.stringify(data.toolsUsed))
 } catch (err) {
       clearInterval(interval)
