@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       attempts++
 
       const message = await client.messages.create({
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 4096,
         temperature: 0,
         system: SYSTEM_PROMPT,
