@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       attempts++
 
       const message = await client.messages.create({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-4-5-20250929',
         max_tokens: 4096,
         temperature: 0,
         system: SYSTEM_PROMPT,
@@ -161,14 +161,11 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      const validation = validateWorkflow(parsed)
-      if (!validation.valid) {
-        if (attempts < maxAttempts) continue
-console.error('Validation failed:', validation.error, JSON.stringify(parsed, null, 2).substring(0, 500))
-return NextResponse.json(
-  { error: `Invalid workflow structure: ${validation.error}` },
-  { status: 500 }
-)
+const validation = validateWorkflow(parsed)
+if (!validation.valid && attempts < maxAttempts) {
+  console.error('Validation failed, retrying:', validation.error)
+  continue
+}
       }
 
       workflow = parsed
