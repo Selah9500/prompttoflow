@@ -162,10 +162,9 @@ export async function POST(request: NextRequest) {
       }
 
 const validation = validateWorkflow(parsed)
-if (!validation.valid && attempts < maxAttempts) {
-  console.error('Validation failed, retrying:', validation.error)
-  continue
-}
+      if (!validation.valid && attempts < maxAttempts) {
+        console.error('Validation failed, retrying:', validation.error)
+        continue
       }
 
       workflow = parsed
